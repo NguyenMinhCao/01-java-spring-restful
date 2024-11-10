@@ -12,14 +12,17 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import vn.hoidanit.jobhunter.domain.RestResponse;
 
 @RestControllerAdvice
 public class GlobalException {
+    // ko tồn tại tài khoản / mật khẩu trong DB
     @ExceptionHandler(value = {
             UsernameNotFoundException.class,
-            BadCredentialsException.class
+            BadCredentialsException.class,
+            IdInvalidException.class
     })
     public ResponseEntity<RestResponse<Object>> handleIdException(Exception ex) {
         RestResponse<Object> restResponse = new RestResponse<Object>();
@@ -29,6 +32,19 @@ public class GlobalException {
         return ResponseEntity.badRequest().body(restResponse);
     }
 
+    @ExceptionHandler(value = {
+            NoResourceFoundException.class,
+            NullPointerException.class
+    })
+    public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception ex) {
+        RestResponse<Object> restResponse = new RestResponse<Object>();
+        restResponse.setMessage("404 not found. URL may not exist..");
+        restResponse.setError(ex.getMessage());
+        restResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
+        return ResponseEntity.badRequest().body(restResponse);
+    }
+
+    // Tài khoản / mật khẩu trống
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<RestResponse<Object>> handleInvalidArgument(MethodArgumentNotValidException ex) {
         BindingResult result = ex.getBindingResult();
