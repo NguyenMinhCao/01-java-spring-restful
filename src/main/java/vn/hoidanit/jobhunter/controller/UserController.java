@@ -8,8 +8,8 @@ import jakarta.validation.Valid;
 import vn.hoidanit.jobhunter.domain.User;
 import vn.hoidanit.jobhunter.domain.dto.ResUpdateUserDTO;
 import vn.hoidanit.jobhunter.domain.dto.ResultPaginationDTO;
-import vn.hoidanit.jobhunter.domain.dto.RestCreateUserDTO;
-import vn.hoidanit.jobhunter.domain.dto.RestUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.ResCreateUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.ResUserDTO;
 import vn.hoidanit.jobhunter.service.UserService;
 import vn.hoidanit.jobhunter.util.annontaion.ApiMessage;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
@@ -48,10 +48,10 @@ public class UserController {
 
     @PostMapping("/users")
     @ApiMessage("create a user")
-    public ResponseEntity<RestCreateUserDTO> createNewUser(@Valid @RequestBody User user) throws IdInvalidException {
+    public ResponseEntity<ResCreateUserDTO> createNewUser(@Valid @RequestBody User user) throws IdInvalidException {
         String hashPassWord = this.passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassWord);
-        RestCreateUserDTO userDTO = this.userService.handleCreateUser(user);
+        ResCreateUserDTO userDTO = this.userService.handleCreateUser(user);
         if (userDTO == null) {
             throw new IdInvalidException("Email đã tồn tại");
         }
@@ -59,9 +59,9 @@ public class UserController {
     }
 
     @GetMapping("/users/{id}")
-    public ResponseEntity<RestUserDTO> getUserById(@PathVariable("id") long id) throws IdInvalidException {
+    public ResponseEntity<ResUserDTO> getUserById(@PathVariable("id") long id) throws IdInvalidException {
 
-        RestUserDTO userRs = this.userService.fetchFRestUserById(id);
+        ResUserDTO userRs = this.userService.fetchFRestUserById(id);
         if (userRs == null) {
             throw new IdInvalidException("Id không tồn tại");
         }

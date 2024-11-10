@@ -12,11 +12,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import vn.hoidanit.jobhunter.domain.User;
-import vn.hoidanit.jobhunter.domain.dto.Meta;
 import vn.hoidanit.jobhunter.domain.dto.ResUpdateUserDTO;
 import vn.hoidanit.jobhunter.domain.dto.ResultPaginationDTO;
-import vn.hoidanit.jobhunter.domain.dto.RestCreateUserDTO;
-import vn.hoidanit.jobhunter.domain.dto.RestUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.ResCreateUserDTO;
+import vn.hoidanit.jobhunter.domain.dto.ResUserDTO;
 import vn.hoidanit.jobhunter.repository.UserRepository;
 
 @Service
@@ -38,10 +37,10 @@ public class UserService {
         return null;
     }
 
-    public RestUserDTO fetchFRestUserById(long id) {
+    public ResUserDTO fetchFRestUserById(long id) {
         User user = this.fetchUserById(id);
         if (user != null) {
-            RestUserDTO userRs = new RestUserDTO();
+            ResUserDTO userRs = new ResUserDTO();
             userRs.setId(user.getId());
             userRs.setName(user.getName());
             userRs.setAddress(user.getAddress());
@@ -59,9 +58,9 @@ public class UserService {
 
         List<User> lstUser = page.getContent();
 
-        List<RestUserDTO> userRs = new ArrayList<>();
+        List<ResUserDTO> userRs = new ArrayList<>();
         for (User user : lstUser) {
-            RestUserDTO dto = new RestUserDTO();
+            ResUserDTO dto = new ResUserDTO();
 
             dto.setId(user.getId());
             dto.setName(user.getName());
@@ -75,7 +74,7 @@ public class UserService {
         }
 
         ResultPaginationDTO rs = new ResultPaginationDTO();
-        Meta mt = new Meta();
+        ResultPaginationDTO.Meta mt = new ResultPaginationDTO.Meta();
         mt.setPage(pageable.getPageNumber() + 1);
         mt.setPageSize(page.getSize());
         mt.setPages(page.getTotalPages());
@@ -90,12 +89,12 @@ public class UserService {
         return this.userRepository.existsByEmail(email);
     }
 
-    public RestCreateUserDTO handleCreateUser(User user) {
+    public ResCreateUserDTO handleCreateUser(User user) {
         if (this.isEmailExist(user.getEmail()) == true) {
             return null;
         } else {
             this.userRepository.save(user);
-            RestCreateUserDTO userDTO = new RestCreateUserDTO();
+            ResCreateUserDTO userDTO = new ResCreateUserDTO();
             userDTO.setId(user.getId());
             userDTO.setAge(user.getAge());
             userDTO.setName(user.getName());
