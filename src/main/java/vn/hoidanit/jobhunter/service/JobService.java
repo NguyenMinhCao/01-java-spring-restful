@@ -9,10 +9,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import vn.hoidanit.jobhunter.domain.Company;
 import vn.hoidanit.jobhunter.domain.Job;
 import vn.hoidanit.jobhunter.domain.Skill;
-import vn.hoidanit.jobhunter.domain.response.ResCreateJobDTO;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
+import vn.hoidanit.jobhunter.domain.response.job.ResCreateJobDTO;
+import vn.hoidanit.jobhunter.repository.CompanyRepository;
 import vn.hoidanit.jobhunter.repository.JobRepository;
 import vn.hoidanit.jobhunter.repository.SkillRepository;
 
@@ -20,9 +22,12 @@ import vn.hoidanit.jobhunter.repository.SkillRepository;
 public class JobService {
     private final JobRepository jobRepository;
     private final SkillRepository skillRepository;
+    private final CompanyRepository companyRepository;
 
-    public JobService(JobRepository jobRepository, SkillRepository skillRepository) {
+    public JobService(JobRepository jobRepository, SkillRepository skillRepository,
+            CompanyRepository companyRepository) {
         this.jobRepository = jobRepository;
+        this.companyRepository = companyRepository;
         this.skillRepository = skillRepository;
     }
 
@@ -53,6 +58,13 @@ public class JobService {
                     : null;
             if (fetchSkillById != null) {
                 lstSkill.add(fetchSkillById);
+            }
+        }
+
+        if (job.getCompany() != null) {
+            Optional<Company> companyById = this.companyRepository.findById(job.getCompany().getId());
+            if (companyById.isPresent()) {
+                job.setCompany(companyById.get());
             }
         }
 
@@ -87,6 +99,12 @@ public class JobService {
             currentJob.setSalary(job.getSalary());
             currentJob.setQuantity(job.getQuantity());
             currentJob.setLevel(job.getLevel());
+            if (job.getCompany() != null) {
+                Optional<Company> companyById = this.companyRepository.findById(job.getCompany().getId());
+                if (companyById.isPresent()) {
+                    currentJob.setCompany(companyById.get());
+                }
+            }
             currentJob.setDescription(job.getDescription());
             currentJob.setActive(job.isActive());
             currentJob.setSkills(lstSkill);
@@ -110,6 +128,7 @@ public class JobService {
         resJob.setStartDate(job.getStartDate());
         resJob.setEndDate(job.getEndDate());
         resJob.setActive(job.isActive());
+        resJob.setCompanyName(job.getCompany().getName());
         resJob.setCreatedAt(job.getCreatedAt());
         resJob.setCreateBy(job.getCreateBy());
 

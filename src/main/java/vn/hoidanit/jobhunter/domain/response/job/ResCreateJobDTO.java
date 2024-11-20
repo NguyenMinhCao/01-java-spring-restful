@@ -1,4 +1,4 @@
-package vn.hoidanit.jobhunter.domain.response;
+package vn.hoidanit.jobhunter.domain.response.job;
 
 import java.time.Instant;
 import java.util.List;
@@ -16,6 +16,7 @@ public class ResCreateJobDTO {
     private Double salary;
     private int quantity;
     private LevelEnum level;
+    private String companyName;
     private Instant startDate;
     private Instant endDate;
     private boolean active;

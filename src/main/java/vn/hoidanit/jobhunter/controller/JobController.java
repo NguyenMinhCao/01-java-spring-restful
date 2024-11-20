@@ -9,8 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 
 import vn.hoidanit.jobhunter.domain.Job;
-import vn.hoidanit.jobhunter.domain.response.ResCreateJobDTO;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
+import vn.hoidanit.jobhunter.domain.response.job.ResCreateJobDTO;
+import vn.hoidanit.jobhunter.service.CompanySevice;
 import vn.hoidanit.jobhunter.service.JobService;
 import vn.hoidanit.jobhunter.util.annontaion.ApiMessage;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
@@ -30,8 +31,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 public class JobController {
 
     private final JobService jobService;
+    private final CompanySevice companySevice;
 
-    public JobController(JobService jobService) {
+    public JobController(JobService jobService, CompanySevice companySevice) {
+        this.companySevice = companySevice;
         this.jobService = jobService;
     }
 
@@ -45,8 +48,12 @@ public class JobController {
 
     @PostMapping("/jobs")
     @ApiMessage("create Jobs")
-    public ResponseEntity<ResCreateJobDTO> createJob(@RequestBody Job job) {
-
+    public ResponseEntity<ResCreateJobDTO> createJob(@RequestBody Job job) throws IdInvalidException {
+        if (job.getCompany() != null) {
+            if (!this.companySevice.findCompanyById(job.getCompany().getId()).isPresent()) {
+                throw new IdInvalidException("Comany không tồn tại");
+            }
+        }
         return ResponseEntity.status(HttpStatus.OK).body(this.jobService.handleCreateJob(job));
     }
 
@@ -66,6 +73,12 @@ public class JobController {
     @PutMapping("/jobs")
     @ApiMessage("update Jobs")
     public ResponseEntity<ResCreateJobDTO> updateJob(@RequestBody Job job) throws IdInvalidException {
+        if (job.getCompany() != null) {
+            if (!this.companySevice.findCompanyById(job.getCompany().getId()).isPresent()) {
+                throw new IdInvalidException("Comany không tồn tại");
+            }
+        }
+        
         Optional<Job> jobOptional = this.jobService.handleFetchByIdJob(job.getId());
 
         if (!jobOptional.isPresent()) {
