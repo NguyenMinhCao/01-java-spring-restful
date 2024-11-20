@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Getter;
 import lombok.Setter;
+import vn.hoidanit.jobhunter.domain.response.ResCreateUserDTO.CompanyUser;
 import vn.hoidanit.jobhunter.util.constant.GenderEnum;
 
 @Getter
@@ -17,9 +18,12 @@ public class ResUserDTO {
     private GenderEnum gender;
     private String address;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant createAt;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
+    // @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant updatedAt;
+
+    private CompanyUser company;
+
 }

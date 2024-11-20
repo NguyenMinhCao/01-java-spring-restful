@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import lombok.Getter;
 import lombok.Setter;
+import vn.hoidanit.jobhunter.domain.response.ResCreateUserDTO.CompanyUser;
 import vn.hoidanit.jobhunter.util.constant.GenderEnum;
 
 @Getter
@@ -19,4 +20,6 @@ public class ResUpdateUserDTO {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss a", timezone = "GMT+7")
     private Instant updatedAt;
+
+    private CompanyUser company;
 }

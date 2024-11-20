@@ -4,9 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
-import vn.hoidanit.jobhunter.domain.Company;
+import vn.hoidanit.jobhunter.domain.Job;
 
 @Repository
-public interface CompanyRepository extends JpaRepository<Company, Long>, JpaSpecificationExecutor<Company> {
-    
+public interface JobRepository extends JpaRepository<Job, Long>, JpaSpecificationExecutor<Job> {
+
 }

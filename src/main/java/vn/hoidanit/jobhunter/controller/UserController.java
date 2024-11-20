@@ -49,9 +49,10 @@ public class UserController {
     @PostMapping("/users")
     @ApiMessage("create a user")
     public ResponseEntity<ResCreateUserDTO> createNewUser(@Valid @RequestBody User user) throws IdInvalidException {
+        Long idCompany = user.getCompany() == null ? 0 : user.getCompany().getId();
         String hashPassWord = this.passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassWord);
-        ResCreateUserDTO userDTO = this.userService.handleCreateUser(user);
+        ResCreateUserDTO userDTO = this.userService.handleCreateUser(user, idCompany);
         if (userDTO == null) {
             throw new IdInvalidException("Email đã tồn tại");
         }
@@ -81,11 +82,13 @@ public class UserController {
 
     @PutMapping("/users")
     @ApiMessage("update a user")
-    public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User userPut) throws IdInvalidException {
-        ResUpdateUserDTO userUpDto = this.userService.handleUpdateUser(userPut);
+    public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User userUpdate) throws IdInvalidException {
+        Long idCompany = userUpdate.getCompany() == null ? 0 : userUpdate.getCompany().getId();
+        ResUpdateUserDTO userUpDto = this.userService.handleUpdateUser(userUpdate, idCompany);
         if (userUpDto == null) {
             throw new IdInvalidException("Id không tồn tại");
         }
+
         return ResponseEntity.status(HttpStatus.OK).body(userUpDto);
     }
 }
