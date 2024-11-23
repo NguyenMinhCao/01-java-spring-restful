@@ -10,6 +10,7 @@ import vn.hoidanit.jobhunter.domain.response.ResCreateUserDTO;
 import vn.hoidanit.jobhunter.domain.response.ResUpdateUserDTO;
 import vn.hoidanit.jobhunter.domain.response.ResUserDTO;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
+import vn.hoidanit.jobhunter.service.RoleService;
 import vn.hoidanit.jobhunter.service.UserService;
 import vn.hoidanit.jobhunter.util.annontaion.ApiMessage;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
@@ -31,12 +32,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/api/v1")
 public class UserController {
 
+    private final RoleService roleService;
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserService userService, PasswordEncoder passwordEncoder) {
+    public UserController(UserService userService, PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
+        this.roleService = roleService;
     }
 
     @GetMapping("/users")
@@ -49,10 +52,14 @@ public class UserController {
     @PostMapping("/users")
     @ApiMessage("create a user")
     public ResponseEntity<ResCreateUserDTO> createNewUser(@Valid @RequestBody User user) throws IdInvalidException {
+        
         Long idCompany = user.getCompany() == null ? 0 : user.getCompany().getId();
+
         String hashPassWord = this.passwordEncoder.encode(user.getPassword());
         user.setPassword(hashPassWord);
+
         ResCreateUserDTO userDTO = this.userService.handleCreateUser(user, idCompany);
+
         if (userDTO == null) {
             throw new IdInvalidException("Email đã tồn tại");
         }
@@ -83,6 +90,10 @@ public class UserController {
     @PutMapping("/users")
     @ApiMessage("update a user")
     public ResponseEntity<ResUpdateUserDTO> updateUser(@RequestBody User userUpdate) throws IdInvalidException {
+        if (!roleService.findRoleById(userUpdate.getRole().getId()).isPresent()) {
+            throw new IdInvalidException("Id Role không tồn tại");
+        }
+       
         Long idCompany = userUpdate.getCompany() == null ? 0 : userUpdate.getCompany().getId();
         ResUpdateUserDTO userUpDto = this.userService.handleUpdateUser(userUpdate, idCompany);
         if (userUpDto == null) {

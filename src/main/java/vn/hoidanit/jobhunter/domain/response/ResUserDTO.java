@@ -4,7 +4,9 @@ import java.time.Instant;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import vn.hoidanit.jobhunter.domain.response.ResCreateUserDTO.CompanyUser;
 import vn.hoidanit.jobhunter.util.constant.GenderEnum;
@@ -25,5 +27,14 @@ public class ResUserDTO {
     private Instant updatedAt;
 
     private CompanyUser company;
+    private RoleUser role;
 
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RoleUser {
+        private Long id;
+        private String name;
+    }
 }

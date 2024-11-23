@@ -22,4 +22,5 @@ public class ResUpdateUserDTO {
     private Instant updatedAt;
 
     private CompanyUser company;
+
 }

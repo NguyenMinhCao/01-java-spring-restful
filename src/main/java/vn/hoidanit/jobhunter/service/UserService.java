@@ -10,14 +10,18 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import vn.hoidanit.jobhunter.domain.Company;
+import vn.hoidanit.jobhunter.domain.Role;
 import vn.hoidanit.jobhunter.domain.User;
 import vn.hoidanit.jobhunter.domain.response.ResCreateUserDTO;
 import vn.hoidanit.jobhunter.domain.response.ResCreateUserDTO.CompanyUser;
 import vn.hoidanit.jobhunter.domain.response.ResUpdateUserDTO;
 import vn.hoidanit.jobhunter.domain.response.ResUserDTO;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
+import vn.hoidanit.jobhunter.repository.CompanyRepository;
+import vn.hoidanit.jobhunter.repository.RoleRepository;
 import vn.hoidanit.jobhunter.repository.UserRepository;
 
 @Service
@@ -26,11 +30,14 @@ public class UserService {
     public PasswordEncoder passwordEncoder;
 
     private final UserRepository userRepository;
-    private final CompanySevice companySevice;
+    private final CompanyRepository companyRepository;
+    private final RoleRepository roleRepository;
 
-    public UserService(UserRepository userRepository, CompanySevice companySevice) {
+    public UserService(UserRepository userRepository, CompanyRepository companyRepository,
+            RoleRepository roleRepository) {
         this.userRepository = userRepository;
-        this.companySevice = companySevice;
+        this.companyRepository = companyRepository;
+        this.roleRepository = roleRepository;
     }
 
     public User fetchUserById(long id) {
@@ -44,25 +51,8 @@ public class UserService {
     public ResUserDTO fetchFRestUserById(long id) {
         User user = this.fetchUserById(id);
         if (user != null) {
-            Company companyById = this.companySevice.findCompanyById(user.getCompany().getId()).isPresent()
-                    ? this.companySevice.findCompanyById(user.getCompany().getId()).get()
-                    : null;
-            CompanyUser company = new CompanyUser();
-            ResUserDTO userRs = new ResUserDTO();
-            userRs.setId(user.getId());
-            userRs.setName(user.getName());
-            userRs.setAddress(user.getAddress());
-            userRs.setAge(user.getAge());
-            userRs.setGender(user.getGender());
-            userRs.setCreateAt(user.getCreatedAt());
-            userRs.setUpdatedAt(user.getUpdatedAt());
-            if (companyById != null) {
-                company.setId(companyById.getId());
-                company.setName(companyById.getName());
-                userRs.setCompany(company);
-            }
-
-            return userRs;
+            ResUserDTO res = convertUserToResUserDTO(user);
+            return res;
         }
         return null;
     }
@@ -74,26 +64,8 @@ public class UserService {
 
         List<ResUserDTO> userRs = new ArrayList<>();
         for (User user : lstUser) {
-
-            Company companyById = user.getCompany() == null
-                    ? null
-                    : this.companySevice.findCompanyById(user.getCompany().getId()).get();
-            ResUserDTO dto = new ResUserDTO();
-            CompanyUser company = new CompanyUser();
-            dto.setId(user.getId());
-            dto.setName(user.getName());
-            dto.setAddress(user.getAddress());
-            dto.setGender(user.getGender());
-            dto.setAge(user.getAge());
-            dto.setCreateAt(user.getCreatedAt());
-            dto.setUpdatedAt(user.getUpdatedAt());
-            if (companyById != null) {
-                company.setId(companyById.getId());
-                company.setName(companyById.getName());
-                dto.setCompany(company);
-            }
-
-            userRs.add(dto);
+            ResUserDTO res = convertUserToResUserDTO(user);
+            userRs.add(res);
         }
 
         ResultPaginationDTO rs = new ResultPaginationDTO();
@@ -108,6 +80,35 @@ public class UserService {
         return rs;
     }
 
+    public ResUserDTO convertUserToResUserDTO(User user) {
+        Company companyById = user.getCompany() == null
+                ? null
+                : this.companyRepository.findById(user.getCompany().getId()).get();
+
+        CompanyUser company = new CompanyUser();
+
+        ResUserDTO dto = new ResUserDTO();
+        ResUserDTO.RoleUser roleUser = new ResUserDTO.RoleUser();
+        dto.setId(user.getId());
+        dto.setName(user.getName());
+        dto.setAddress(user.getAddress());
+        dto.setGender(user.getGender());
+        dto.setAge(user.getAge());
+        dto.setCreateAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
+        if (companyById != null) {
+            company.setId(companyById.getId());
+            company.setName(companyById.getName());
+            dto.setCompany(company);
+        }
+        if (user.getRole() != null) {
+            roleUser.setId(user.getRole().getId());
+            roleUser.setName(user.getRole().getName());
+            dto.setRole(roleUser);
+        }
+        return dto;
+    }
+
     public Boolean isEmailExist(String email) {
         return this.userRepository.existsByEmail(email);
     }
@@ -116,13 +117,20 @@ public class UserService {
         if (this.isEmailExist(user.getEmail()) == true) {
             return null;
         } else {
-            Company companyById = !this.companySevice.findCompanyById(companyId).isPresent() || companyId == 0
+            // check company
+            Company companyById = !this.companyRepository.findById(companyId).isPresent() || companyId == 0
                     ? null
-                    : this.companySevice.findCompanyById(companyId).get();
+                    : this.companyRepository.findById(companyId).get();
             if (companyById == null) {
                 user.setCompany(null);
             }
+            // check role
+            if (user.getRole() != null) {
+                Role r = this.roleRepository.findById(user.getRole().getId()).get();
+                user.setRole(r);
+            }
             this.userRepository.save(user);
+
             ResCreateUserDTO userDTO = new ResCreateUserDTO();
             CompanyUser companyUser = new CompanyUser();
             if (companyById != null) {
@@ -145,24 +153,24 @@ public class UserService {
     public ResUpdateUserDTO handleUpdateUser(User user, Long companyId) {
         User currentUser = this.fetchUserById(user.getId());
         if (currentUser != null) {
-            Company companyById = !this.companySevice.findCompanyById(companyId).isPresent() || companyId == 0
+            Company companyById = !this.companyRepository.findById(companyId).isPresent() || companyId == 0
                     ? null
-                    : this.companySevice.findCompanyById(companyId).get();
-            if (companyById == null) {
-                currentUser.setCompany(null);
-            }
+                    : this.companyRepository.findById(companyId).get();
+
+            currentUser.setName(user.getName());
+            currentUser.setGender(user.getGender());
+            currentUser.setAddress(user.getAddress());
+            currentUser.setAge(user.getAge());
+            currentUser.setRole(user.getRole());
+            currentUser.setCompany(companyById == null ? null : companyById);
+            this.userRepository.save(currentUser);
+
             CompanyUser companyUser = new CompanyUser();
             if (companyById != null) {
                 companyUser.setId(companyById.getId());
                 companyUser.setName(companyById.getName());
             }
 
-            currentUser.setName(user.getName());
-            currentUser.setGender(user.getGender());
-            currentUser.setAddress(user.getAddress());
-            currentUser.setAge(user.getAge());
-            currentUser.setCompany(companyById);
-            this.userRepository.save(currentUser);
             ResUpdateUserDTO resUd = new ResUpdateUserDTO();
             resUd.setId(currentUser.getId());
             resUd.setAddress(currentUser.getAddress());
@@ -178,6 +186,10 @@ public class UserService {
 
     public void handleDeleteUser(long id) {
         this.userRepository.deleteById(id);
+    }
+
+    public User findUserWithPermissionsByUsername(String username) {
+        return this.userRepository.findUserWithPermissionsByEmail(username);
     }
 
     public User handleGetUserByUsername(String username) {
