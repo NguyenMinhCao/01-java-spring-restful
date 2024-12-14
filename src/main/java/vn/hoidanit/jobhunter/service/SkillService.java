@@ -1,5 +1,6 @@
 package vn.hoidanit.jobhunter.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.domain.Page;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import vn.hoidanit.jobhunter.domain.Skill;
+import vn.hoidanit.jobhunter.domain.Subscriber;
 import vn.hoidanit.jobhunter.domain.response.ResultPaginationDTO;
 import vn.hoidanit.jobhunter.repository.SkillRepository;
 
@@ -55,7 +57,14 @@ public class SkillService {
     }
 
     public void handleDeleteSkill(Long id) {
-        this.skillRepository.deleteById(id);
+        Optional<Skill> currentSkill = this.skillRepository.findById(id);
+        if (currentSkill != null) {
+            List<Subscriber> lstSub = currentSkill.get().getSubscribers();
+            for (Subscriber subscriber : lstSub) {
+                subscriber.getSkills().remove(currentSkill.get());
+            }
+        }
+        this.skillRepository.delete(currentSkill.get());
     }
 
     public boolean checkExitsByName(String name) {

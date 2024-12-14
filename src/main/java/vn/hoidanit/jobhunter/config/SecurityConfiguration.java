@@ -43,7 +43,8 @@ public class SecurityConfiguration {
     public SecurityFilterChain filterChain(HttpSecurity http,
             CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
         String[] whiteList = {
-                "/", "/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh", "/storage/**"
+                "/", "/api/v1/auth/login", "/api/v1/auth/register", "/api/v1/auth/refresh", "/api/v1/email/**",
+                "/storage/**"
         };
         http
                 .csrf(c -> c.disable())
@@ -54,7 +55,7 @@ public class SecurityConfiguration {
                                 .requestMatchers(HttpMethod.GET, "/api/v1/companies").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/jobs").permitAll()
                                 .requestMatchers(HttpMethod.GET, "/api/v1/skills").permitAll()
-                                
+
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults())
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
