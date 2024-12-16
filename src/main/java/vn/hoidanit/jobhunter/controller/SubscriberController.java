@@ -2,6 +2,7 @@ package vn.hoidanit.jobhunter.controller;
 
 import java.util.Optional;
 
+import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import jakarta.validation.Valid;
 import vn.hoidanit.jobhunter.domain.Subscriber;
 import vn.hoidanit.jobhunter.service.SubscriberService;
 import vn.hoidanit.jobhunter.service.UserService;
+import vn.hoidanit.jobhunter.util.SecurityUtil;
 import vn.hoidanit.jobhunter.util.annontaion.ApiMessage;
 import vn.hoidanit.jobhunter.util.error.IdInvalidException;
 
@@ -49,4 +51,12 @@ public class SubscriberController {
         Subscriber res = this.subscriberService.handleUpdateSubscriber(subById.get(), subscriber.getSkills());
         return ResponseEntity.ok().body(res);
     }
+
+    @PostMapping("/subscribers/skills")
+    @ApiMessage("get subscribers skills")
+    public ResponseEntity<List<Subscriber>> getSubscribersSkills() {
+        String email = SecurityUtil.getCurrentUserLogin().isPresent() ? SecurityUtil.getCurrentUserLogin().get() : "";
+        return ResponseEntity.ok().body(this.subscriberService.findByEmail(email));
+    }
+
 }

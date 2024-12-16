@@ -26,9 +26,9 @@ public class GlobalException {
     })
     public ResponseEntity<RestResponse<Object>> handleIdException(Exception ex) {
         RestResponse<Object> restResponse = new RestResponse<Object>();
-        restResponse.setMessage("Exception occurs....");
-        restResponse.setError(ex.getMessage());
         restResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
+        restResponse.setMessage(ex.getMessage());
+        restResponse.setError("Exception occurs....");
         return ResponseEntity.badRequest().body(restResponse);
     }
 
@@ -38,8 +38,8 @@ public class GlobalException {
     })
     public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception ex) {
         RestResponse<Object> restResponse = new RestResponse<Object>();
-        restResponse.setMessage("404 not found. URL may not exist..");
-        restResponse.setError(ex.getMessage());
+        restResponse.setMessage(ex.getMessage());
+        restResponse.setError("404 not found. URL may not exist..");
         restResponse.setStatusCode(HttpStatus.NOT_FOUND.value());
         return ResponseEntity.badRequest().body(restResponse);
     }
@@ -69,8 +69,8 @@ public class GlobalException {
     })
     public ResponseEntity<RestResponse<Object>> handleUploadException(Exception ex) {
         RestResponse<Object> restResponse = new RestResponse<Object>();
-        restResponse.setMessage("Exception upload file....");
-        restResponse.setError(ex.getMessage());
+        restResponse.setMessage(ex.getMessage());
+        restResponse.setError("Exception upload file....");
         restResponse.setStatusCode(HttpStatus.BAD_REQUEST.value());
         return ResponseEntity.badRequest().body(restResponse);
     }
@@ -80,8 +80,8 @@ public class GlobalException {
     })
     public ResponseEntity<RestResponse<Object>> handlePermissionException(Exception ex) {
         RestResponse<Object> restResponse = new RestResponse<Object>();
-        restResponse.setMessage("Forbidden");
-        restResponse.setError(ex.getMessage());
+        restResponse.setMessage(ex.getMessage());
+        restResponse.setError("Forbidden");
         restResponse.setStatusCode(HttpStatus.FORBIDDEN.value());
         return ResponseEntity.badRequest().body(restResponse);
     }

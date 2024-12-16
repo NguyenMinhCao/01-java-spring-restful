@@ -62,6 +62,7 @@ public class CompanyController {
     @GetMapping("/companies/{id}")
     public ResponseEntity<Company> findCompanyById(@PathVariable("id") long id) {
         Company company = this.companySevice.findCompanyById(id).get();
+//        return ResponseEntity.ok().body(company);
         return ResponseEntity.ok().body(company);
     }
 
